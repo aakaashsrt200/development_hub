@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+<form method="post">
+  <div class="container">
+    <label for="username"><b>Username : </b></label>
+    <input type="text" placeholder="Enter Username" name="uname" required>
+	<br><br>
+    <label for="password"><b>Password : </b></label>
+    <input type="password" placeholder="Enter Password" name="pwd" required>
+	<br>
+	<p>{{ErrorText}}</p>
+	<br>
+
+    <label>
+      <input type="checkbox" checked="checked" name="remember">  Remember me
+    </label>
+	<br><br>
+	    <button type="submit">Login</button>
+  </div>
+  
+	<br> <br>
+  <div class="container" style="background-color:#f1f1f1">
+    <input type="submit" name="action" value="submit">
+  </div>
+</form>
+</body>
+</html>

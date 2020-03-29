@@ -1,0 +1,7 @@
+- Used to generate and download the files from GST site. developed for Mr. Sankar.
+- Config.ini is needed to run this code
+- Options need to be configured in a way you want to run the code
+- run_download option need to be set to false if you want to just generate the extarcts and should be set to true if you wanna download
+- username and password are necessary to run the code
+- Month names are to be given separated with semicolon (;) eg: April;March;May;June;July
+- Period should be mentioned in this format 2018-19
