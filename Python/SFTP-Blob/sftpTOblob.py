@@ -4,13 +4,13 @@ import sys
 from azure.storage.blob import BlockBlobService
 import os
 
-sftp_host = 'sftp.rbeu.rubikloud.com'
-sftp_uname = 'rbsftp'
-sftp_password = 'P*rK&lS#@1920'
+sftp_host = ''
+sftp_uname = ''
+sftp_password = ''
 
-blob_name = 'rbdevlrbuscacdevsa'
-blob_key = '3gOpO3CzFb+/hsBBzHS+/fdDXfAFSkiEfpYmPcFWGkRVR5F0++Vg2N8Lnive7pLTUq5IiYhjViMC7h5QimCnwQ=='
-blob_container = 'rawdata'
+blob_name = ''
+blob_key = ''
+blob_container = ''
 bpath = 'raw/RB/US/'
 bdate = '/2019/11/19'
 bpath_pos_daily = 'RB_POS_DAILY'
