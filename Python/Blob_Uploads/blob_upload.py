@@ -46,9 +46,9 @@ CONST_CONFIG_BLOB_CONTAINER = 'blob_container'
 CONST_CONFIG_BLOB_PATH = 'blob_path'
 CONST_CONFIG_DESTINATION_PATH = 'destination_path'
 
-account_name='rbecommstorageaccount01'
-account_key='CJhAw/21gsqYf6/jwL1frQHg6+9fRC+7zg3OB0MfLY9+ncJ0hHdfSVP3Aj7jQAKx7+DuY/6opV25kTki4Of4WQ=='
-container="rblanding"
+account_name=''
+account_key=''
+container=''
 
 #Get values from config .INI file
 def _get_config_value(path, key, value):
