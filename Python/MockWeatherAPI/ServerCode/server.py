@@ -8,12 +8,12 @@ import simplejson as json
 from decimal import Decimal
 import mysql.connector
 
-CONST_MYSQL_HOST = "localhost"
-CONST_MYSQL_USER = "root"
-CONST_MYSQL_PASS = "root"
-CONST_MYSQL_DB = "mock_weather"
+CONST_MYSQL_HOST = ""
+CONST_MYSQL_USER = ""
+CONST_MYSQL_PASS = ""
+CONST_MYSQL_DB = ""
 
-CONST_AUTH_PASS = "cervellotalentacq"
+CONST_AUTH_PASS = ""
 
 
 def connectMySql():
