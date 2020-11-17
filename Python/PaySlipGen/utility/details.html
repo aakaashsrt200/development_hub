@@ -1,0 +1,136 @@
+<html><head>
+
+</head>
+<body>
+    <p align="center" style="font-size:160%"><b>
+    Payslip for the month of {month}/{year}</b></p>
+<table border="1" align="center" width="100%" cellpadding="10" style="font-family:calibri;font-size:10px">
+<thead>
+<tr>
+
+
+
+
+</tr>
+</thead>
+<tbody>
+<tr>
+<td width="15%" align="left"><b>Emp ID</b></td>
+<td width="30%" align="left">{emp_id}</td>
+<td width="15%" align="left"><b>Employee Name</b></td>
+<td width="40%" align="left">{emp_name}</td>
+</tr>
+<tr>
+<td align="left"><b>DOJ</b></td>
+<td align="left">{doj}</td>
+<td align="left"><b>Pay Days</b></td>
+<td align="left">{pay_days}</td>
+</tr>
+<tr>
+<td align="left"><b>Department</b></td>
+<td align="left">{department}</td>
+<td align="left"><b>Designation</b></td>
+<td align="left">{designation}</td>
+</tr>
+<tr>
+<td align="left"><b>A/c No.</b></td>
+<td align="left">{acc_number}</td>
+<td align="left"><b>Branch</b></td>
+<td align="left">{branch}</td>
+</tr>
+<tr>
+<td align="left"><b>IFSC</b></td>
+<td align="left">{mode_of_pay}</td>
+<td align="left"><b>Bank</b></td>
+<td align="left">{pan_number}</td>
+</tr>
+<tr>
+<td align="left"><b>PF UAN</b></td>
+<td align="left">{pf_uan}</td>
+<td align="left"><b>PAN</b></td>
+<td align="left">{esi_number}</td>
+</tr>
+</tbody>
+</table>
+ <br><br>
+
+<table border="1" align="center" width="100%" cellpadding="10" style="font-family:calibri;font-size:10px">
+<tbody><tr>
+<th width="17%">Earnings</th>
+<th width="17%">For the month</th>
+<th width="17%">YTD</th>
+<th rowspan="8" width="3%">
+</th><th width="15%">Deduction</th>
+<th width="17%">For the month</th>
+<th width="17%">YTD</th>
+</tr>
+<tr>
+<td align="left">Basic</td>
+<td align="right">{ftm_basic}</td>
+<td align="right">{ytd_basic}</td><td align="left">EPFO</td>
+<td align="right">{dftm_epfo}</td>
+<td align="right">{dytd_epfo}</td>
+</tr>
+<tr>
+<td align="left">HRA</td>
+<td align="right">{ftm_hra}</td>
+<td align="right">{ytd_hra}</td><td align="left">ESIC</td>
+<td align="right">{dftm_esic}</td>
+<td align="right">{dytd_esic}</td>
+</tr>
+<tr>
+<td align="left">DA</td>
+<td align="right">{ftm_da}</td>
+<td align="right">{ytd_da}</td>
+<td align="left">TDS</td>
+<td align="right">{dftm_tds}</td>
+<td align="right">{dytd_tds}</td>
+</tr>
+<tr>
+<td align="left">Other Allow</td>
+<td align="right">{ftm_otherallow}</td>
+<td align="right">{ytd_otherallow}</td>
+<td align="left">Transport</td>
+<td align="right">{dftm_transport}</td>
+<td align="right">{dytd_transport}</td>
+</tr>
+<tr>
+<td align="left">OT</td>
+<td align="right">{ftm_ot}</td>
+<td align="right">{ytd_ot}</td>
+<td align="left" colspan="3"></td>
+</tr>
+<tr>
+</tr>
+<tr>
+<th align="left">Earned Gross
+</th><th>{ftm_gross}
+</th><th>{ytd_gross}
+</th><th aligh="left">Gross Deduction
+</th><th>{dftm_gross}
+</th><th>{dytd_gross}
+</th></tr><tr height="30px">
+<td colspan="7" colwidth="10"></td>
+</tr>
+
+<tr>
+<th>Net Pay for the month
+</th><th>{ftm_netpay}
+</th><th>In words
+</th>
+<td colspan="4">INR {ftm_netpay_words} only
+</td></tr>
+<tr height="45px">
+<th>Net YTD
+</th><th>{ytd_netpay}
+</th><th>In words
+</th>
+<td colspan="4">INR {ytd_netpay_words} only
+</td>
+</tr>
+<tr>
+<th align="left" colspan="7" height="80"></th>
+</tr>
+</tbody></table>
+
+</body></html>
