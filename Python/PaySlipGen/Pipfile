@@ -6,12 +6,14 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-pandas = "*"
 xlrd = "*"
 xlwt = "*"
 fpdf = "*"
 datetime = "*"
-numpy = "*"
+pandas = "*"
+numpy = "==1.19.3"
+pathlib = "*"
+mime = "*"
 
 [requires]
 python_version = "3.7"
