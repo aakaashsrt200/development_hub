@@ -113,9 +113,9 @@
 <td align="right">{ftm_ot}</td>
 <td align="right">{ytd_ot}</td>
 <td> </td>
-<td align="left"> </td>
-<td align="left"> </td>
-<td align="left"> </td>
+<td align="left">Advance</td>
+<td align="right">{ftm_advance}</td>
+<td align="right">{ytd_advance}</td>
 </tr>
 <tr>
 <th align="left">Earned Gross</th>

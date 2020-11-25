@@ -7,12 +7,23 @@
 # =========================================================================================#
 
 import os
+import sys
 import logging
 import datetime
 from datetime import datetime, timedelta
 from fpdf import FPDF, HTMLMixin
 import pandas as pd
 import pathlib
+import email as mail
+import smtplib, ssl
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# PROGRAM CONSTANTS
+CONST_PROGRAM_FAILURE = 0
+CONST_PROGRAM_SUCCESS = 1
 
 logging.basicConfig(
     format="=>%(levelname)s : %(asctime)s : %(filename)s : %(funcName)s |::| %(message)s",
@@ -36,6 +47,8 @@ MONTH_LIST = [
 CURRENT_YEAR = 2020
 CURRENT_MONTH = "NOV"
 SOURCE_FILES_PATH = "./files/"
+SENDER_EMAIL = "aakaashsrt200@gmail.com"
+PASSWORD = "varaak~260116"
 
 
 def get_timestamp_as_str():
@@ -57,8 +70,8 @@ def ensure_directory(folder_path):
     try:
         pathlib.Path(folder_path).mkdir(parents=True, exist_ok=True)
     except Exception as e:
-        logging.error("Couldn't create folder : " + folder_path)
-        logging.error(str(e))
+        logging.error("*** " + "Couldn't create folder : " + folder_path)
+        logging.error("*** " + str(e))
 
 
 def send_email(recepient, attachment):
@@ -71,6 +84,41 @@ def send_email(recepient, attachment):
     """
     logging.debug(recepient)
     logging.debug(attachment)
+
+    email_body = (
+        "Here is the payslip for the month of "
+        + str(CURRENT_MONTH)
+        + "-"
+        + str(CURRENT_YEAR)
+    )
+    subject = (
+        "Accounts Dept | Payslip -  " + str(CURRENT_MONTH) + "-" + str(CURRENT_YEAR)
+    )
+    message = MIMEMultipart()
+    message["From"] = SENDER_EMAIL
+    message["To"] = recepient
+    message["Subject"] = subject
+    message["Bcc"] = ""
+
+    # Add body to email
+    message.attach(MIMEText(email_body, "plain"))
+
+    attach_file_path = open(attachment, "rb")  # Open the file as binary mode
+    payload = MIMEBase("application", "octate-stream")
+    payload.set_payload((attach_file_path).read())
+    encoders.encode_base64(payload)  # encode the attachment
+    # add payload header with filename
+    payload.add_header(
+        "Content-Disposition", "attachment", filename=attachment.split("/")[-1]
+    )
+    message.attach(payload)
+
+    text = message.as_string()
+
+    session = smtplib.SMTP("smtp.gmail.com", 587)  # use gmail with port
+    session.starttls()
+    session.login(SENDER_EMAIL, PASSWORD)
+    session.sendmail(SENDER_EMAIL, recepient, text)
 
 
 def read_excel(file_name: str, **kwargs):
@@ -200,7 +248,7 @@ def get_html_content(path: str):
             return file.read()
     # pylint:disable=broad-except
     except Exception as error:
-        logging.error(str(error))
+        logging.error("*** " + str(error))
 
 
 def initialize_pdf_template(img_path: str = None):
@@ -220,7 +268,7 @@ def initialize_pdf_template(img_path: str = None):
         return obj
     # pylint:disable=broad-except
     except Exception as error:
-        logging.error(str(error))
+        logging.error("*** " + str(error))
 
 
 def process(pdf, html):
@@ -229,76 +277,84 @@ def process(pdf, html):
     Args:
         pdf (obj): Pre-defined PDF object to which the THML content has to be written
         html (str) : HTML taglines in string format
+
+    Return:
+        (Bool): Says the status of the function run
     """
+    try:
+        obj = pdf
+        available_files = file_list(SOURCE_FILES_PATH)
+        index = MONTH_LIST.index(CURRENT_MONTH)
+        ellgible_files = []
+        if index < 9:
+            for i, m in enumerate(MONTH_LIST):
+                if i > 8:
+                    pass
+                else:
+                    if i <= index:
+                        ellgible_files.append(m + "_" + str(CURRENT_YEAR) + ".xlsx")
+        else:
+            for i, m in enumerate(MONTH_LIST):
+                if i < 9:
+                    ellgible_files.append(m + "_" + str(CURRENT_YEAR - 1) + ".xlsx")
+                else:
+                    if i <= index:
+                        ellgible_files.append(m + "_" + str(CURRENT_YEAR) + ".xlsx")
 
-    available_files = file_list(SOURCE_FILES_PATH)
-    index = MONTH_LIST.index(CURRENT_MONTH)
-    ellgible_files = []
-    if index < 9:
-        for i, m in enumerate(MONTH_LIST):
-            if i > 8:
-                pass
-            else:
-                if i <= index:
-                    ellgible_files.append(m + "_" + str(CURRENT_YEAR) + ".xlsx")
-    else:
-        for i, m in enumerate(MONTH_LIST):
-            if i < 9:
-                ellgible_files.append(m + "_" + str(CURRENT_YEAR - 1) + ".xlsx")
-            else:
-                if i <= index:
-                    ellgible_files.append(m + "_" + str(CURRENT_YEAR) + ".xlsx")
+        if not set(ellgible_files).issubset(set(available_files)):
+            missing_files = [
+                ellgible_file
+                for ellgible_file in ellgible_files
+                if not ellgible_file in available_files
+            ]
+            logging.warning("REQUIRED FILES NOT FOUNT")
+            logging.error("*** " + "MISSING FILES : " + str(missing_files))
+            return False
 
-    if not set(ellgible_files).issubset(set(available_files)):
-        missing_files = [
-            ellgible_file
-            for ellgible_file in ellgible_files
-            if not ellgible_file in available_files
+        data_frames = []
+        eligible_months = [file.replace(".xlsx", "") for file in ellgible_files]
+        # Append dataframes of all the months
+        for file in ellgible_files:
+            data = read_excel(
+                f"{SOURCE_FILES_PATH}{file}", sheet_name=0, header=0, skiprows=1
+            )
+            cols = data.columns
+            conv = dict(zip(cols, [str] * len(cols)))
+            data = read_excel(
+                f"{SOURCE_FILES_PATH}{file}",
+                sheet_name=0,
+                header=0,
+                skiprows=1,
+                converters=conv,
+            )
+            data.dropna(axis=0, how="all", inplace=True)
+            data_frames.append(data)
+
+        ytd_dataframe = pd.concat(data_frames)
+        ytd_dataframe = ytd_dataframe.dropna(subset=["EMP ID", "EMPLOYEE  NAME"])
+
+        current_month_data = ytd_dataframe.copy()
+        current_month_data = current_month_data[
+            (current_month_data["MONTH"] == CURRENT_MONTH)
+            & (current_month_data["YEAR"] == str(CURRENT_YEAR))
         ]
-        logging.warning("REQUIRED FILES NOT FOUNT")
-        logging.error("MISSING FILES : " + str(missing_files))
-        return None
 
-    data_frames = []
-    eligible_months = [file.replace(".xlsx", "") for file in ellgible_files]
-    # Append dataframes of all the months
-    for file in ellgible_files:
-        data = read_excel(
-            f"{SOURCE_FILES_PATH}{file}", sheet_name=0, header=0, skiprows=1
-        )
-        cols = data.columns
-        conv = dict(zip(cols, [str] * len(cols)))
-        data = read_excel(
-            f"{SOURCE_FILES_PATH}{file}",
-            sheet_name=0,
-            header=0,
-            skiprows=1,
-            converters=conv,
-        )
-        data.dropna(axis=0, how="all", inplace=True)
-        data_frames.append(data)
-
-    ytd_dataframe = pd.concat(data_frames)
-    ytd_dataframe = ytd_dataframe.dropna(subset=["EMP ID", "EMPLOYEE  NAME"])
-
-    current_month_data = ytd_dataframe.copy()
-    current_month_data = current_month_data[
-        (current_month_data["MONTH"] == CURRENT_MONTH)
-        & (current_month_data["YEAR"] == str(CURRENT_YEAR))
-    ]
-
-    employee_list = current_month_data["EMP ID"].unique()
-    # Building the necessary data for individual employee
-    for employee in employee_list:
-        logging.debug("Generating Payslip for employee ID : " + employee)
-        employee_df = current_month_data[current_month_data["EMP ID"] == employee]
-        data = build_employee_data(employee_df, ytd_dataframe, eligible_months)
-        """
-            Call the function to replace the strings from HTML content & write the HTML data into PDF
-        """
-        write_pdf(pdf=pdf, html=html, filename=employee + ".pdf")
-        send_email(data["EMAIL_ID"], "./payslip/" + employee + ".pdf")
-    return data
+        employee_list = current_month_data["EMP ID"].unique()
+        # Building the necessary data for individual employee
+        for employee in employee_list:
+            logging.debug("Generating Payslip for employee ID : " + employee)
+            employee_df = current_month_data[current_month_data["EMP ID"] == employee]
+            data = build_employee_data(employee_df, ytd_dataframe, eligible_months)
+            """
+                Call the function to replace the strings from HTML content & write the HTML data into PDF
+            """
+            write_pdf(pdf=pdf, html=html, filename=employee + ".pdf")
+            payslip_path = os.getcwd() + "/payslip/" + employee + ".pdf"
+            # send_email(data["EMAIL_ID"], payslip_path)
+        return True
+    except Exception as e:
+        logging.error("*** " + str(e))
+        return False
 
 
 def main():
@@ -313,15 +369,12 @@ def main():
     pdf.ln(43)
     process_status = process(pdf, html)
 
-    if process_status is None:
+    if not process_status:
         # To be built
-        logging.error("Error in process function")
-        pass
+        logging.error("*** " + "Error in process function")
+        sys.exit(CONST_PROGRAM_FAILURE)
     else:
-        # To be built
-        pass
-
-    return True
+        return True
 
 
 if __name__ == "__main__":
@@ -337,3 +390,4 @@ if __name__ == "__main__":
             + get_timestamp_as_str()
             + "================"
         )
+        sys.exit(CONST_PROGRAM_SUCCESS)
