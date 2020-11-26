@@ -20,15 +20,39 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import configparser
 
 # PROGRAM CONSTANTS
 CONST_PROGRAM_FAILURE = 0
 CONST_PROGRAM_SUCCESS = 1
 
+CONST_SOURCE_FILES_PATH = "./files/"
+CONST_CONFIG_PATH = "./config.ini"
+
 logging.basicConfig(
     format="=>%(levelname)s : %(asctime)s : %(filename)s : %(funcName)s |::| %(message)s",
     level=logging.DEBUG,
 )
+
+
+def get_config_value(path):
+    """
+    Connect to conf.ini and get the values
+
+    Args :
+        path (str) : path of the config .ini file
+
+    Returns:
+        config_data (obj) : Object that contains all the config data in it
+    """
+    config_data = configparser.ConfigParser()
+    config_path = path
+    config_data.read(config_path)
+    # data = appConfig.get(key, value)
+    return config_data
+
+
+config = get_config_value(CONST_CONFIG_PATH)
 
 MONTH_LIST = [
     "APR",
@@ -44,11 +68,13 @@ MONTH_LIST = [
     "FEB",
     "MAR",
 ]
-CURRENT_YEAR = 2020
-CURRENT_MONTH = "NOV"
-SOURCE_FILES_PATH = "./files/"
-SENDER_EMAIL = "aakaashsrt200@gmail.com"
-PASSWORD = "varaak~260116"
+CURRENT_YEAR = int(config.get("run_config", "for_the_year"))
+CURRENT_MONTH = config.get("run_config", "for_the_month").upper()
+EMAIL_FLAG = (
+    True if config.get("email_config", "email_send").lower() == "true" else False
+)
+SENDER_EMAIL = config.get("email_config", "email_address")
+PASSWORD = config.get("email_config", "email_password")
 
 
 def get_timestamp_as_str():
@@ -283,8 +309,9 @@ def process(pdf, html):
     """
     try:
         obj = pdf
-        available_files = file_list(SOURCE_FILES_PATH)
+        available_files = file_list(CONST_SOURCE_FILES_PATH)
         index = MONTH_LIST.index(CURRENT_MONTH)
+        print("----------------")
         ellgible_files = []
         if index < 9:
             for i, m in enumerate(MONTH_LIST):
@@ -316,12 +343,12 @@ def process(pdf, html):
         # Append dataframes of all the months
         for file in ellgible_files:
             data = read_excel(
-                f"{SOURCE_FILES_PATH}{file}", sheet_name=0, header=0, skiprows=1
+                f"{CONST_SOURCE_FILES_PATH}{file}", sheet_name=0, header=0, skiprows=1
             )
             cols = data.columns
             conv = dict(zip(cols, [str] * len(cols)))
             data = read_excel(
-                f"{SOURCE_FILES_PATH}{file}",
+                f"{CONST_SOURCE_FILES_PATH}{file}",
                 sheet_name=0,
                 header=0,
                 skiprows=1,
@@ -349,8 +376,9 @@ def process(pdf, html):
                 Call the function to replace the strings from HTML content & write the HTML data into PDF
             """
             write_pdf(pdf=pdf, html=html, filename=employee + ".pdf")
-            payslip_path = os.getcwd() + "/payslip/" + employee + ".pdf"
-            # send_email(data["EMAIL_ID"], payslip_path)
+            if EMAIL_FLAG == True:
+                payslip_path = os.getcwd() + "/payslip/" + employee + ".pdf"
+                send_email(data["EMAIL_ID"], payslip_path)
         return True
     except Exception as e:
         logging.error("*** " + str(e))
