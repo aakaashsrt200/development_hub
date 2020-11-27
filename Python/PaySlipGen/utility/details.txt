@@ -1,7 +1,7 @@
 <html><head>
 </head>
 <body>
-<h2 align="center" style="color:black;"><b>Payslip for the month of {month}/{year}</b></h2>
+<h2 align="center" style="color:black;"><b>Payslip for the month of {MONTH}/{YEAR}</b></h2>
 <br><br><br>
 <font size="10" face="Courier New" >
 <table border="0" align="center" width="100%" cellpadding="8">
@@ -16,15 +16,15 @@
 <tbody>
 <tr>
 <td align="left">Emp ID</td>
-<td align="left">{emp_id}</td>
+<td align="left">{EMP ID}</td>
 <td align="left">Employee Name</td>
-<td align="left">{emp_name}</td>
+<td align="left">{EMPLOYEE  NAME}</td>
 </tr>
 <tr>
 <td align="left">DOJ</td>
 <td align="left">{doj}</td>
 <td align="left">Pay Days</td>
-<td align="left">{pay_days}</td>
+<td align="left">{W.DAYS}</td>
 </tr>
 <tr>
 <td align="left">Department</td>
@@ -34,21 +34,21 @@
 </tr>
 <tr>
 <td align="left">A/c No.</td>
-<td align="left">{acc_number}</td>
+<td align="left">{A/C NO}</td>
 <td align="left">Branch</td>
-<td align="left">{branch}</td>
+<td align="left">{BRANCH}</td>
 </tr>
 <tr>
 <td align="left">IFSC</td>
-<td align="left">{mode_of_pay}</td>
+<td align="left">{IFSC}</td>
 <td align="left">Bank</td>
-<td align="left">{pan_number}</td>
+<td align="left">{BANK}</td>
 </tr>
 <tr>
 <td align="left">PF UAN</td>
-<td align="left">{pf_uan}</td>
+<td align="left">{UAN}</td>
 <td align="left">PAN</td>
-<td align="left">{esi_number}</td>
+<td align="left">{PAN}</td>
 </tr>
 <tr>
 <td colspan="4"> </td>
@@ -74,75 +74,75 @@
 </tr>
 <tr>
 <td align="left">Basic</td>
-<td align="right">{ftm_basic}</td>
-<td align="right">{ytd_basic}</td>
+<td align="right">{BASIC}</td>
+<td align="right">{YTD BASIC}</td>
 <td> </td>
 <td align="left">EPFO</td>
-<td align="right">{dftm_epfo}</td>
-<td align="right">{dytd_epfo}</td>
+<td align="right">{EPFO}</td>
+<td align="right">{YTD EPFO}</td>
 </tr>
 <tr>
 <td align="left">HRA</td>
-<td align="right">{ftm_hra}</td>
-<td align="right">{ytd_hra}</td>
+<td align="right">{HRA}</td>
+<td align="right">{YTD HRA}</td>
 <td> </td>
 <td align="left">ESIC</td>
-<td align="right">{dftm_esic}</td>
-<td align="right">{dytd_esic}</td>
+<td align="right">{ESIC}</td>
+<td align="right">{YTD ESIC}</td>
 </tr>
 <tr>
 <td align="left">DA</td>
-<td align="right">{ftm_da}</td>
-<td align="right">{ytd_da}</td>
+<td align="right">{DA}</td>
+<td align="right">{YTD DA}</td>
 <td> </td>
 <td align="left">TDS</td>
-<td align="right">{dftm_tds}</td>
-<td align="right">{dytd_tds}</td>
+<td align="right">{TDS}</td>
+<td align="right">{YTD TDS}</td>
 </tr>
 <tr>
 <td align="left">Other Allow</td>
-<td align="right">{ftm_otherallow}</td>
-<td align="right">{ytd_otherallow}</td>
+<td align="right">{OTHR ALLOW}</td>
+<td align="right">{YTD OTHR ALLOW}</td>
 <td> </td>
 <td align="left">Transport</td>
-<td align="right">{dftm_transport}</td>
-<td align="right">{dytd_transport}</td>
+<td align="right">{Transport}</td>
+<td align="right">{YTD Transport}</td>
 </tr>
 <tr>
 <td align="left">OT</td>
-<td align="right">{ftm_ot}</td>
-<td align="right">{ytd_ot}</td>
+<td align="right">{O.T WAGES}</td>
+<td align="right">{YTD O.T WAGES}</td>
 <td> </td>
 <td align="left">Advance</td>
-<td align="right">{ftm_advance}</td>
-<td align="right">{ytd_advance}</td>
+<td align="right">{Adavance}</td>
+<td align="right">{YTD Adavance}</td>
 </tr>
 <tr>
 <th align="left">Earned Gross</th>
-<th>{ftm_gross}</th>
-<th>{ytd_gross}</th>
+<th align="right">{GROSS SALARY}</th>
+<th align="right">{YTD GROSS SALARY}</th>
 <td> </td>
 <th aligh="left">Gross Deduction</th>
-<th>{dftm_gross}</th>
-<th>{dytd_gross}</th>
+<th align="right">{GROSS DEDUCTION}</th>
+<th align="right">{YTD GROSS DEDUCTION}</th>
 </tr>
 <tr height="30px">
 <th colspan="7" colwidth="10"> </th>
 </tr>
 <tr>
 <th>Net For the month</th>
-<th colspan="2">{ftm_netpay}</th>
+<th colspan="2">{Net salary }</th>
 <th> </th>
 <th>Net YTD</th>
-<th colspan="2">{ytd_netpay}</th>
+<th colspan="2">{YTD Net salary }</th>
 </tr>
 <tr height="45px">
-<th>In words</th>
-<th colspan="6">INR {ftm_netpay_words} only</th>
+<th>Net FTM In words</th>
+<th colspan="6">{NET PAY IN WORDS}</th>
 </tr>
 <tr>
-<th>In words</th>
-<th colspan="6">INR {ytd_netpay_words} only</th>
+<th>Net YTD In words</th>
+<th colspan="6">{YTD NET PAY IN WORDS}</th>
 </tr>
 <tr>
 <th align="left" colspan="7" height="80"> </th>

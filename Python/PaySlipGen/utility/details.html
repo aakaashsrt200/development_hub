@@ -1,136 +1,146 @@
 <html><head>
-
 </head>
 <body>
-    <p align="center" style="font-size:160%"><b>
-    Payslip for the month of {month}/{year}</b></p>
-<table border="1" align="center" width="100%" cellpadding="10" style="font-family:calibri;font-size:10px">
+<h2 align="center" style="color:black;"><b>Payslip for the month of {MONTH}/{YEAR}</b></h2>
+<br><br><br>
+<font size="10" face="Courier New" >
+<table border="0" align="center" width="100%" cellpadding="8">
 <thead>
 <tr>
-
-
-
-
+<th width = "20%"></th>
+<th width = "30%"></th>
+<th width = "20%"></th>
+<th width = "30%"></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td width="15%" align="left"><b>Emp ID</b></td>
-<td width="30%" align="left">{emp_id}</td>
-<td width="15%" align="left"><b>Employee Name</b></td>
-<td width="40%" align="left">{emp_name}</td>
+<td align="left">Emp ID</td>
+<td align="left">{EMP ID}</td>
+<td align="left">Employee Name</td>
+<td align="left">{EMPLOYEE  NAME}</td>
 </tr>
 <tr>
-<td align="left"><b>DOJ</b></td>
+<td align="left">DOJ</td>
 <td align="left">{doj}</td>
-<td align="left"><b>Pay Days</b></td>
-<td align="left">{pay_days}</td>
+<td align="left">Pay Days</td>
+<td align="left">{W.DAYS}</td>
 </tr>
 <tr>
-<td align="left"><b>Department</b></td>
+<td align="left">Department</td>
 <td align="left">{department}</td>
-<td align="left"><b>Designation</b></td>
+<td align="left">Designation</td>
 <td align="left">{designation}</td>
 </tr>
 <tr>
-<td align="left"><b>A/c No.</b></td>
-<td align="left">{acc_number}</td>
-<td align="left"><b>Branch</b></td>
-<td align="left">{branch}</td>
+<td align="left">A/c No.</td>
+<td align="left">{A/C NO}</td>
+<td align="left">Branch</td>
+<td align="left">{BRANCH}</td>
 </tr>
 <tr>
-<td align="left"><b>IFSC</b></td>
-<td align="left">{mode_of_pay}</td>
-<td align="left"><b>Bank</b></td>
-<td align="left">{pan_number}</td>
+<td align="left">IFSC</td>
+<td align="left">{IFSC}</td>
+<td align="left">Bank</td>
+<td align="left">{BANK}</td>
 </tr>
 <tr>
-<td align="left"><b>PF UAN</b></td>
-<td align="left">{pf_uan}</td>
-<td align="left"><b>PAN</b></td>
-<td align="left">{esi_number}</td>
+<td align="left">PF UAN</td>
+<td align="left">{UAN}</td>
+<td align="left">PAN</td>
+<td align="left">{PAN}</td>
+</tr>
+<tr>
+<td colspan="4"> </td>
+</tr>
+</tr>
+<tr>
+<td colspan="4"> </td>
 </tr>
 </tbody>
 </table>
- <br><br>
-
-<table border="1" align="center" width="100%" cellpadding="10" style="font-family:calibri;font-size:10px">
+</font>
+<br>
+<font size="8" face="Courier New" >
+<table border="1" align="center" width="100%" cellpadding="8">
 <tbody><tr>
-<th width="17%">Earnings</th>
+<th width="14%">Earnings</th>
 <th width="17%">For the month</th>
 <th width="17%">YTD</th>
-<th rowspan="8" width="3%">
-</th><th width="15%">Deduction</th>
+<th width="4%" rowspan="8"> </th>
+<th width="14%">Deduction</th>
 <th width="17%">For the month</th>
 <th width="17%">YTD</th>
 </tr>
 <tr>
 <td align="left">Basic</td>
-<td align="right">{ftm_basic}</td>
-<td align="right">{ytd_basic}</td><td align="left">EPFO</td>
-<td align="right">{dftm_epfo}</td>
-<td align="right">{dytd_epfo}</td>
+<td align="right">{BASIC}</td>
+<td align="right">{YTM BASIC}</td>
+<td align="left">EPFO</td>
+<td align="right">{EPFO}</td>
+<td align="right">{YTD EPFO}</td>
 </tr>
 <tr>
 <td align="left">HRA</td>
-<td align="right">{ftm_hra}</td>
-<td align="right">{ytd_hra}</td><td align="left">ESIC</td>
-<td align="right">{dftm_esic}</td>
-<td align="right">{dytd_esic}</td>
+<td align="right">{HRA}</td>
+<td align="right">{YTM HRA}</td>
+<td align="left">ESIC</td>
+<td align="right">{ESIC}</td>
+<td align="right">{YTD ESIC}</td>
 </tr>
 <tr>
 <td align="left">DA</td>
-<td align="right">{ftm_da}</td>
-<td align="right">{ytd_da}</td>
+<td align="right">{DA}</td>
+<td align="right">{YTD DA}</td>
 <td align="left">TDS</td>
-<td align="right">{dftm_tds}</td>
-<td align="right">{dytd_tds}</td>
+<td align="right">{TDS}</td>
+<td align="right">{YTD TDS}</td>
 </tr>
 <tr>
 <td align="left">Other Allow</td>
-<td align="right">{ftm_otherallow}</td>
-<td align="right">{ytd_otherallow}</td>
+<td align="right">{OTHR ALLOW}</td>
+<td align="right">{YTD OTHR ALLOW}</td>
 <td align="left">Transport</td>
-<td align="right">{dftm_transport}</td>
-<td align="right">{dytd_transport}</td>
+<td align="right">{Transport}</td>
+<td align="right">{YTD Transport}</td>
 </tr>
 <tr>
 <td align="left">OT</td>
-<td align="right">{ftm_ot}</td>
-<td align="right">{ytd_ot}</td>
-<td align="left" colspan="3"></td>
+<td align="right">{O.T WAGES}</td>
+<td align="right">{YTD O.T WAGES}</td>
+<td align="left">Advance</td>
+<td align="right">{Adavance}</td>
+<td align="right">{YTD Adavance}</td>
 </tr>
 <tr>
+<th align="left">Earned Gross</th>
+<th>{GROSS SALARY}</th>
+<th>{YTD GROSS SALARY}</th>
+<th aligh="left">Gross Deduction</th>
+<th>{dftm_gross}</th>
+<th>{dytd_gross}</th>
+</tr>
+<tr height="30px">
+<th colspan="7" colwidth="10"> </th>
 </tr>
 <tr>
-<th align="left">Earned Gross
-</th><th>{ftm_gross}
-</th><th>{ytd_gross}
-</th><th aligh="left">Gross Deduction
-</th><th>{dftm_gross}
-</th><th>{dytd_gross}
-</th></tr><tr height="30px">
-<td colspan="7" colwidth="10"></td>
+<th>Net For the month</th>
+<th colspan="2">{Net salary}</th>
+<th> </th>
+<th>Net YTD</th>
+<th colspan="2">{YTD Net salary }</th>
 </tr>
-
-<tr>
-<th>Net Pay for the month
-</th><th>{ftm_netpay}
-</th><th>In words
-</th>
-<td colspan="4">INR {ftm_netpay_words} only
-</td></tr>
 <tr height="45px">
-<th>Net YTD
-</th><th>{ytd_netpay}
-</th><th>In words
-</th>
-<td colspan="4">INR {ytd_netpay_words} only
-</td>
+<th>In words</th>
+<th colspan="6">INR {ftm_netpay_words} only</th>
 </tr>
 <tr>
-<th align="left" colspan="7" height="80"></th>
+<th>In words</th>
+<th colspan="6">INR {ytd_netpay_words} only</th>
+</tr>
+<tr>
+<th align="left" colspan="7" height="80"> </th>
 </tr>
 </tbody></table>
-
+</font>
 </body></html>

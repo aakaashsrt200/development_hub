@@ -8,11 +8,13 @@
 
 import os
 import sys
+import re
 import logging
 import datetime
 from datetime import datetime, timedelta
 from fpdf import FPDF, HTMLMixin
 import pandas as pd
+from num2words import num2words
 import pathlib
 import email as mail
 import smtplib, ssl
@@ -21,13 +23,30 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import configparser
+import pikepdf
+from pikepdf import Pdf
+import numpy as np
 
 # PROGRAM CONSTANTS
 CONST_PROGRAM_FAILURE = 0
 CONST_PROGRAM_SUCCESS = 1
 
-CONST_SOURCE_FILES_PATH = "./files/"
-CONST_CONFIG_PATH = "./config.ini"
+
+def get_timestamp_as_str():
+    """Fetch current datetimestamp in string
+
+    Returns:
+        str: current datetime
+    """
+    return str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+
+CONST_OUTPUT_PATH = (
+    "./payslip/" + get_timestamp_as_str().replace("-", "").replace(":", "")[0:13] + r"/"
+)
+CONST_SOURCE_FILES_PATH = r"./files/"
+CONST_CONFIG_PATH = r"./config.ini"
+CONST_BG_IMAGE_PATH = r"./utility/payslip_bg.png"
 
 logging.basicConfig(
     format="=>%(levelname)s : %(asctime)s : %(filename)s : %(funcName)s |::| %(message)s",
@@ -77,15 +96,6 @@ SENDER_EMAIL = config.get("email_config", "email_address")
 PASSWORD = config.get("email_config", "email_password")
 
 
-def get_timestamp_as_str():
-    """Fetch current datetimestamp in string
-
-    Returns:
-        str: current datetime
-    """
-    return str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-
 def ensure_directory(folder_path):
     """
     Makes sure that the given folder location is available or creates one
@@ -98,6 +108,21 @@ def ensure_directory(folder_path):
     except Exception as e:
         logging.error("*** " + "Couldn't create folder : " + folder_path)
         logging.error("*** " + str(e))
+
+
+def pdf_protect(attachment, password):
+    """
+    This function takes a file as an input and creates another file in the same destination
+    This file is encrypted with the password defined earlier
+    """
+    pdf = Pdf.open(attachment, allow_overwriting_input=True)
+    pdf.save(
+        attachment,
+        encryption=pikepdf.Encryption(owner=password, user=password, R=4),
+    )
+    # you can change the 4 to 6 for 256 aes encryption but that file won't open on Acrobat versions lower than 10.0
+    pdf.close()
+    return
 
 
 def send_email(recepient, attachment):
@@ -183,6 +208,30 @@ def file_list(path, extension: str = ".xlsx"):
     return filelist
 
 
+def number_to_words(number):
+    try:
+        float(number)
+        split = str(number).split(".")
+        rupees = split[0]
+        rupees = (
+            num2words(rupees, lang="en_IN").replace("-", " ").replace(",", " ").title()
+        )
+        paise = ""
+        if len(split) > 1:
+            paise = split[1][:2]
+            if int(paise) > 0:
+                paise = (
+                    num2words(paise, lang="en_IN")
+                    .replace("-", " ")
+                    .replace(",", " ")
+                    .title()
+                )
+                return f"Rupees {rupees} & Paise {paise} Only"
+        return f"Rupees {rupees} Only"
+    except Exception as error:
+        return ""
+
+
 def build_employee_data(employee_df, ytd_dataframe, eligible_months):
     """Produce the data related to an employee (both YTD & Current month)
 
@@ -194,12 +243,8 @@ def build_employee_data(employee_df, ytd_dataframe, eligible_months):
     Returns:
         result (Dict) : Dict with all employee related data filled in
     """
-
-    employee_df = employee_df.fillna(0).to_dict(orient="records")[0]
     numerical_column = [
         "FIXED SALARY",
-        "A.DAYS",
-        "W.DAYS",
         "BASIC",
         "DA",
         "OTHR ALLOW",
@@ -219,23 +264,54 @@ def build_employee_data(employee_df, ytd_dataframe, eligible_months):
         "Net salary ",
         "TOTAL CHK",
     ]
+    employee_df = employee_df.fillna(0)
+    employee_df["GROSS DEDUCTION"] = employee_df.apply(
+        lambda row: float(row["EPFO"])
+        + float(row["ESIC"])
+        + float(row["TDS"])
+        + float(row["Transport"])
+        + float(row.get("advance", "0")),
+        axis=1,
+    )
+    employee_df[numerical_column] = employee_df[numerical_column].apply(
+        pd.to_numeric, errors="coerce", downcast="float"
+    )
+    employee_df = employee_df.fillna(0)
+    employee_df["NET PAY IN WORDS"] = employee_df.apply(
+        lambda row: number_to_words(row["Net salary "]), axis=1
+    )
+    employee_df = employee_df.to_dict(orient="records")[0]
     ytd_data = ytd_dataframe.copy()
-    ytd_data = ytd_data[(ytd_data["EMP ID"] == "10001")]
     ytd_data["MONTH YEAR"] = ytd_data[["MONTH", "YEAR"]].apply(
         lambda x: "_".join(x), axis=1
     )
     ytd_data = ytd_data[ytd_data["MONTH YEAR"].isin(eligible_months)]
     ytd_data = ytd_data[["EMP ID"] + numerical_column]
-    ytd_data = ytd_data.apply(pd.to_numeric, errors="coerce").fillna(0)
+    ytd_data = ytd_data.apply(pd.to_numeric, errors="coerce", downcast="float")
+    ytd_data = ytd_data.fillna(0)
+    ytd_data["GROSS DEDUCTION"] = ytd_data.apply(
+        lambda row: float(row["EPFO"])
+        + float(row["ESIC"])
+        + float(row["TDS"])
+        + float(row["Transport"])
+        + float(row.get("advance", "0")),
+        axis=1,
+    )
     ytd_data = ytd_data.groupby(["EMP ID"]).sum()
     ytd_data.reset_index(inplace=True)
     ytd_data = ytd_data.to_dict(orient="records")[0]
-    result = {"YTD " + key: val for key, val in ytd_data.items()}
+    result = {
+        "YTD " + key: val and val for key, val in ytd_data.items() if key != "EMP ID"
+    }
     result.update(employee_df)
+    result.update({"YTD NET PAY IN WORDS": number_to_words(result["YTD Net salary "])})
+    for key, value in result.items():
+        if isinstance(value, float):
+            result[key] = "{:.2f}".format(value)
     return result
 
 
-def write_pdf(pdf, html, filename):
+def write_pdf(html, filename, password=None):
     """Write the given HTML content to the PDF object & then to the file
 
     Args:
@@ -243,10 +319,15 @@ def write_pdf(pdf, html, filename):
         html (str) : HTML taglines in string format
         filename (str) : Output file name
     """
-    path = "./payslip/"
-    ensure_directory(path)
+    # pdf = initialize_pdf_template(CONST_BG_IMAGE_PATH)
+    pdf = initialize_pdf_template()
+    pdf.ln(43)
+    ensure_directory(CONST_OUTPUT_PATH)
     pdf.write_html(html)
-    pdf.output(path + filename)
+    pdf.output(CONST_OUTPUT_PATH + filename)
+
+    if password:
+        pdf_protect(CONST_OUTPUT_PATH + filename, password)
 
 
 class MyFPDF(FPDF, HTMLMixin):
@@ -297,7 +378,29 @@ def initialize_pdf_template(img_path: str = None):
         logging.error("*** " + str(error))
 
 
-def process(pdf, html):
+def replace_place_holders(html: str = "", data: dict = {}):
+    """Replace all the place holders in the provided html string
+
+    Args:
+        html (str, optional): Html template string. Defaults to "".
+        data (dict, optional): Data to be replaced with. Defaults to {}.
+
+    Returns:
+        [str]: Html string replaced with placeholders.
+    """
+    # for key, value in data.items():
+    #    html = html.replace("{" + str(key) + "}", str(value))
+    pattern = re.compile(r"{[a-zA-Z0-9_/. ]+}")
+    match = pattern.findall(html)
+    for value in match:
+        html = html.replace(
+            str(value), str(data.get(str(value).replace("{", "").replace("}", ""), "-"))
+        )
+        # html = html.replace(value, " - ")
+    return html
+
+
+def process():
     """Process orchestrator takes control of the procedure
 
     Args:
@@ -308,10 +411,8 @@ def process(pdf, html):
         (Bool): Says the status of the function run
     """
     try:
-        obj = pdf
         available_files = file_list(CONST_SOURCE_FILES_PATH)
         index = MONTH_LIST.index(CURRENT_MONTH)
-        print("----------------")
         ellgible_files = []
         if index < 9:
             for i, m in enumerate(MONTH_LIST):
@@ -343,13 +444,16 @@ def process(pdf, html):
         # Append dataframes of all the months
         for file in ellgible_files:
             data = read_excel(
-                f"{CONST_SOURCE_FILES_PATH}{file}", sheet_name=0, header=0, skiprows=1
+                f"{CONST_SOURCE_FILES_PATH}{file}",
+                sheet_name="MAIN SHEET",
+                header=0,
+                skiprows=1,
             )
             cols = data.columns
             conv = dict(zip(cols, [str] * len(cols)))
             data = read_excel(
                 f"{CONST_SOURCE_FILES_PATH}{file}",
-                sheet_name=0,
+                sheet_name="MAIN SHEET",
                 header=0,
                 skiprows=1,
                 converters=conv,
@@ -357,27 +461,43 @@ def process(pdf, html):
             data.dropna(axis=0, how="all", inplace=True)
             data_frames.append(data)
 
-        ytd_dataframe = pd.concat(data_frames)
-        ytd_dataframe = ytd_dataframe.dropna(subset=["EMP ID", "EMPLOYEE  NAME"])
-
-        current_month_data = ytd_dataframe.copy()
+        consolidated_data = pd.concat(data_frames)
+        current_month_data = consolidated_data.copy()
+        current_month_data.to_excel("test.xlsx")
         current_month_data = current_month_data[
             (current_month_data["MONTH"] == CURRENT_MONTH)
             & (current_month_data["YEAR"] == str(CURRENT_YEAR))
         ]
-
+        current_month_data = current_month_data.dropna(subset=["EMP ID"])
         employee_list = current_month_data["EMP ID"].unique()
         # Building the necessary data for individual employee
         for employee in employee_list:
-            logging.debug("Generating Payslip for employee ID : " + employee)
+            logging.debug("Generating Payslip for employee ID : " + str(employee))
+            employee_df = current_month_data.copy()
             employee_df = current_month_data[current_month_data["EMP ID"] == employee]
-            data = build_employee_data(employee_df, ytd_dataframe, eligible_months)
-            """
-                Call the function to replace the strings from HTML content & write the HTML data into PDF
-            """
-            write_pdf(pdf=pdf, html=html, filename=employee + ".pdf")
+            ytd_employee_df = consolidated_data.copy()
+            ytd_employee_df = consolidated_data[consolidated_data["EMP ID"] == employee]
+            data = build_employee_data(employee_df, ytd_employee_df, eligible_months)
+            html = get_html_content(r"./utility/details.txt")
+            content = replace_place_holders(html, data)
+            write_pdf(
+                html=content,
+                filename=employee
+                + "_"
+                + str(CURRENT_MONTH)
+                + str(CURRENT_YEAR)
+                + ".pdf",
+                password=data.get("password", None),
+            )
             if EMAIL_FLAG == True:
-                payslip_path = os.getcwd() + "/payslip/" + employee + ".pdf"
+                payslip_path = (
+                    CONST_OUTPUT_PATH
+                    + employee
+                    + "_"
+                    + str(CURRENT_MONTH)
+                    + str(CURRENT_YEAR)
+                    + ".pdf"
+                )
                 send_email(data["EMAIL_ID"], payslip_path)
         return True
     except Exception as e:
@@ -391,11 +511,7 @@ def main():
     Returns:
         Boolean: True/False based on execution status
     """
-    pdf = initialize_pdf_template()
-    # pdf = initialize_pdf_template(r"./utility/payslip_bg.png")
-    html = get_html_content(r"./utility/details.txt")
-    pdf.ln(43)
-    process_status = process(pdf, html)
+    process_status = process()
 
     if not process_status:
         # To be built
@@ -407,7 +523,7 @@ def main():
 
 if __name__ == "__main__":
     print(
-        "============== Execution Started  "
+        "============== Execution Started "
         + get_timestamp_as_str()
         + "================\n"
     )
